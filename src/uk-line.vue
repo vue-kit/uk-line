@@ -1,8 +1,12 @@
 <template lang="pug">
     svg.uk-line(:width="width" :height="height" :viewBox="box" :style="style")
-        path(:d="path" :stroke="color" :stroke-width="normalizedBorderWidth")
+        path(:d="path" :stroke="color" :stroke-width="normalizedBorderWidth" stroke-linecap="round")
+        path(:d="arrow" :stroke="color" :fill="color" :stroke-width="normalizedBorderWidth"
+            stroke-linecap="round" stroke-linejoin="round")
 </template>
 <script>
+    const ARROW_ANGLE = Math.PI / 9;
+    const ARROW_LENGTH = 20;
     export default {
         name: "uk-line",
         props: {
@@ -76,6 +80,17 @@
             normalizedBorderWidth() {
                 return parseFloat(this.borderWidth);
             },
+            includedAngle() {
+                let diffY = this.normalizedEndY - this.normalizedStartY;
+                let diffX = this.normalizedEndX - this.normalizedStartX;
+                if (diffX > 0) {
+                    return Math.atan(diffY / diffX);
+                } else if (diffX == 0) {
+                    return diffY > 0 ? Math.PI / 2 : Math.PI / 2 * -1;
+                } else {
+                    return Math.PI + Math.atan(diffY / diffX);
+                }
+            },
             width() {
                 return Math.abs(this.normalizedStartX - this.normalizedEndX) + this.normalizedBorderWidth;
             },
@@ -91,12 +106,33 @@
                     left: Math.min(this.normalizedStartX, this.normalizedEndX) + "px"
                 }
             },
+            computedStart() {
+                return {
+                    x: this.normalizedStartX - parseInt(this.style.left) + this.normalizedBorderWidth / 2,
+                    y: this.normalizedStartY - parseInt(this.style.top) + this.normalizedBorderWidth / 2
+                }
+            },
+            computedEnd() {
+                return {
+                    x: this.normalizedEndX - parseInt(this.style.left) + this.normalizedBorderWidth / 2,
+                    y: this.normalizedEndY - parseInt(this.style.top) + this.normalizedBorderWidth / 2
+                }
+            },
             path() {
-                let sx = this.normalizedStartX - parseInt(this.style.left) + this.normalizedBorderWidth / 2;
-                let sy = this.normalizedStartY - parseInt(this.style.top) + this.normalizedBorderWidth / 2;
-                let ex = this.normalizedEndX - parseInt(this.style.left) + this.normalizedBorderWidth / 2;
-                let ey = this.normalizedEndY - parseInt(this.style.top) + this.normalizedBorderWidth / 2;
-                return "M" + sx + " " + sy + " L" + ex + " " + ey;
+                return "M" + this.computedStart.x + " " + this.computedStart.y +
+                        " L" + this.computedEnd.x + " " + this.computedEnd.y;
+            },
+            arrow() {
+                let endX = this.computedEnd.x;
+                let endY = this.computedEnd.y;
+                let arrowSX = endX - (ARROW_LENGTH * Math.cos(this.includedAngle + ARROW_ANGLE));
+                let arrowSY = endY - (ARROW_LENGTH * Math.sin(this.includedAngle + ARROW_ANGLE));
+                let arrowEX = endX - (ARROW_LENGTH * Math.cos(this.includedAngle - ARROW_ANGLE));
+                let arrowEY = endY - (ARROW_LENGTH * Math.sin(this.includedAngle - ARROW_ANGLE));
+                let arrowMX = endX - (ARROW_LENGTH / 2 * Math.cos(this.includedAngle));
+                let arrowMY = endY - (ARROW_LENGTH / 2 * Math.sin(this.includedAngle));
+                return "M" + arrowSX + " " + arrowSY + " L" + endX + " " + endY +
+                        " L" + arrowEX + " " + arrowEY + " L" + arrowMX + " " + arrowMY + " Z";
             },
             color() {
                 let c = this.borderColor;
