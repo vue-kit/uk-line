@@ -1,6 +1,7 @@
 <template lang="pug">
     svg.uk-line(:width="width" :height="height" :viewBox="box" :style="style")
-        path(:d="path" :stroke="color" :stroke-width="normalizedBorderWidth" stroke-linecap="round")
+        path(:d="path" :stroke="color" :stroke-width="normalizedBorderWidth"
+            :stroke-dasharray="dash" stroke-linecap="round")
         path(:d="arrowPath" :stroke="color" :fill="color" :stroke-width="normalizedBorderWidth"
             stroke-linecap="round" stroke-linejoin="round")
 </template>
@@ -52,6 +53,13 @@
                     return val === "default" || val === "success" || val === "warning" ||
                             val === "danger" || /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(val)
                 }
+            },
+            strokeDashed: {
+                type: [String, Boolean],
+                default: false,
+                validator(val) {
+                    return typeof val === "boolean" || val === "true" || val === "false";
+                }
             }
         },
         data() {
@@ -61,7 +69,8 @@
                 endX: this.x2,
                 endY: this.y2,
                 borderWidth: this.strokeWidth,
-                borderColor: this.strokeColor
+                borderColor: this.strokeColor,
+                dashed: this.strokeDashed
             }
         },
         computed: {
@@ -79,6 +88,9 @@
             },
             normalizedBorderWidth() {
                 return parseFloat(this.borderWidth);
+            },
+            normalizedDashed() {
+                return typeof this.dashed === "string" ? this.dashed === "true" : this.dashed;
             },
             includedAngle() {
                 let diffY = this.normalizedEndY - this.normalizedStartY;
@@ -178,6 +190,13 @@
                     c = "#f0506e";
                 }
                 return c;
+            },
+            dash() {
+                if (this.normalizedDashed) {
+                    return "4% 3%";
+                } else {
+                    return false;
+                }
             }
         }
     }
