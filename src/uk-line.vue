@@ -1,8 +1,8 @@
 <template lang="pug">
     svg.uk-line(:width="width" :height="height" :viewBox="box" :style="style")
-        path(:d="path" :stroke="color" :stroke-width="normalizedBorderWidth"
+        path(:d="path" :stroke="color" :stroke-width="borderWidth"
             :stroke-dasharray="dash" stroke-linecap="round")
-        path(:d="arrowPath" :stroke="color" :fill="color" :stroke-width="normalizedBorderWidth"
+        path(:d="arrowPath" :stroke="color" :fill="color" :stroke-width="borderWidth"
             stroke-linecap="round" stroke-linejoin="round")
 </template>
 <script>
@@ -62,39 +62,29 @@
                 }
             }
         },
-        data() {
-            return {
-                startX: this.x1,
-                startY: this.y1,
-                endX: this.x2,
-                endY: this.y2,
-                borderWidth: this.strokeWidth,
-                borderColor: this.strokeColor,
-                dashed: this.strokeDashed
-            }
-        },
         computed: {
-            normalizedStartX() {
-                return parseInt(this.startX);
+            startX() {
+                return parseInt(this.x1);
             },
-            normalizedStartY() {
-                return parseInt(this.startY);
+            startY() {
+                return parseInt(this.y1);
             },
-            normalizedEndX() {
-                return parseInt(this.endX);
+            endX() {
+                return parseInt(this.x2);
             },
-            normalizedEndY() {
-                return parseInt(this.endY);
+            endY() {
+                return parseInt(this.y2);
             },
-            normalizedBorderWidth() {
-                return parseFloat(this.borderWidth);
+            borderWidth() {
+                return parseFloat(this.strokeWidth);
             },
-            normalizedDashed() {
-                return typeof this.dashed === "string" ? this.dashed === "true" : this.dashed;
+            dashed() {
+                return typeof this.strokeDashed === "string" ?
+                        this.strokeDashed === "true" : this.strokeDashed;
             },
             includedAngle() {
-                let diffY = this.normalizedEndY - this.normalizedStartY;
-                let diffX = this.normalizedEndX - this.normalizedStartX;
+                let diffY = this.endY - this.startY;
+                let diffX = this.endX - this.startX;
                 if (diffX > 0) {
                     return Math.atan(diffY / diffX);
                 } else if (diffX == 0) {
@@ -104,12 +94,12 @@
                 }
             },
             arrow() {
-                let arrowSX = this.normalizedEndX - (ARROW_LENGTH * Math.cos(this.includedAngle + ARROW_ANGLE));
-                let arrowSY = this.normalizedEndY - (ARROW_LENGTH * Math.sin(this.includedAngle + ARROW_ANGLE));
-                let arrowEX = this.normalizedEndX - (ARROW_LENGTH * Math.cos(this.includedAngle - ARROW_ANGLE));
-                let arrowEY = this.normalizedEndY - (ARROW_LENGTH * Math.sin(this.includedAngle - ARROW_ANGLE));
-                let arrowMX = this.normalizedEndX - (ARROW_LENGTH / 2 * Math.cos(this.includedAngle));
-                let arrowMY = this.normalizedEndY - (ARROW_LENGTH / 2 * Math.sin(this.includedAngle));
+                let arrowSX = this.endX - (ARROW_LENGTH * Math.cos(this.includedAngle + ARROW_ANGLE));
+                let arrowSY = this.endY - (ARROW_LENGTH * Math.sin(this.includedAngle + ARROW_ANGLE));
+                let arrowEX = this.endX - (ARROW_LENGTH * Math.cos(this.includedAngle - ARROW_ANGLE));
+                let arrowEY = this.endY - (ARROW_LENGTH * Math.sin(this.includedAngle - ARROW_ANGLE));
+                let arrowMX = this.endX - (ARROW_LENGTH / 2 * Math.cos(this.includedAngle));
+                let arrowMY = this.endY - (ARROW_LENGTH / 2 * Math.sin(this.includedAngle));
                 return {
                     startX: arrowSX,
                     startY: arrowSY,
@@ -121,25 +111,21 @@
             },
             min() {
                 return {
-                    x: Math.min(this.normalizedStartX, this.normalizedEndX,
-                                this.arrow.startX, this.arrow.endX),
-                    y: Math.min(this.normalizedStartY, this.normalizedEndY,
-                                this.arrow.startY, this.arrow.endY)
+                    x: Math.min(this.startX, this.endX, this.arrow.startX, this.arrow.endX),
+                    y: Math.min(this.startY, this.endY, this.arrow.startY, this.arrow.endY)
                 }
             },
             max() {
                 return {
-                    x: Math.max(this.normalizedStartX, this.normalizedEndX,
-                                this.arrow.startX, this.arrow.endX),
-                    y: Math.max(this.normalizedStartY, this.normalizedEndY,
-                                this.arrow.startY, this.arrow.endY)
+                    x: Math.max(this.startX, this.endX, this.arrow.startX, this.arrow.endX),
+                    y: Math.max(this.startY, this.endY, this.arrow.startY, this.arrow.endY)
                 }
             },
             width() {
-                return this.max.x - this.min.x + this.normalizedBorderWidth;
+                return this.max.x - this.min.x + this.borderWidth;
             },
             height() {
-                return this.max.y - this.min.y + this.normalizedBorderWidth;
+                return this.max.y - this.min.y + this.borderWidth;
             },
             box() {
                 return "0 0 " + this.width + " " + this.height;
@@ -152,20 +138,20 @@
             },
             computedPath() {
                 return {
-                    startX: this.normalizedStartX - parseInt(this.style.left) + this.normalizedBorderWidth / 2,
-                    startY: this.normalizedStartY - parseInt(this.style.top) + this.normalizedBorderWidth / 2,
-                    endX: this.normalizedEndX - parseInt(this.style.left) + this.normalizedBorderWidth / 2,
-                    endY: this.normalizedEndY - parseInt(this.style.top) + this.normalizedBorderWidth / 2
+                    startX: this.startX - parseInt(this.style.left) + this.borderWidth / 2,
+                    startY: this.startY - parseInt(this.style.top) + this.borderWidth / 2,
+                    endX: this.endX - parseInt(this.style.left) + this.borderWidth / 2,
+                    endY: this.endY - parseInt(this.style.top) + this.borderWidth / 2
                 }
             },
             computedArrow() {
                 return {
-                    startX: this.arrow.startX - parseInt(this.style.left) + this.normalizedBorderWidth / 2,
-                    startY: this.arrow.startY - parseInt(this.style.top) + this.normalizedBorderWidth / 2,
-                    endX: this.arrow.endX - parseInt(this.style.left) + this.normalizedBorderWidth / 2,
-                    endY: this.arrow.endY - parseInt(this.style.top) + this.normalizedBorderWidth / 2,
-                    middleX: this.arrow.middleX - parseInt(this.style.left) + this.normalizedBorderWidth / 2,
-                    middleY: this.arrow.middleY - parseInt(this.style.top) + this.normalizedBorderWidth / 2
+                    startX: this.arrow.startX - parseInt(this.style.left) + this.borderWidth / 2,
+                    startY: this.arrow.startY - parseInt(this.style.top) + this.borderWidth / 2,
+                    endX: this.arrow.endX - parseInt(this.style.left) + this.borderWidth / 2,
+                    endY: this.arrow.endY - parseInt(this.style.top) + this.borderWidth / 2,
+                    middleX: this.arrow.middleX - parseInt(this.style.left) + this.borderWidth / 2,
+                    middleY: this.arrow.middleY - parseInt(this.style.top) + this.borderWidth / 2
                 }
             },
             path() {
@@ -179,7 +165,7 @@
                         " L" + this.computedArrow.middleX + " " + this.computedArrow.middleY + " Z";
             },
             color() {
-                let c = this.borderColor;
+                let c = this.strokeColor;
                 if (c == "default") {
                     c = "#1e87f0";
                 } else if (c == "success") {
@@ -192,7 +178,7 @@
                 return c;
             },
             dash() {
-                if (this.normalizedDashed) {
+                if (this.dashed) {
                     return "4% 3%";
                 } else {
                     return false;

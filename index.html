@@ -5,15 +5,71 @@
         <title>uk-line</title>
     </head>
     <body>
-        <div id="app">
-            <uk-line x1="200" y1="200" x2="50" y2="50" stroke-dashed="true"></uk-line>
-            <uk-line x1="200" y1="200" x2="200" y2="50" stroke-color="success"></uk-line>
-            <uk-line x1="200" y1="200" x2="350" y2="50" stroke-color="warning"></uk-line>
-            <uk-line x1="200" y1="200" x2="350" y2="200" stroke-color="danger"></uk-line>
-            <uk-line x1="200" y1="200" x2="350" y2="350" stroke-color="#87B3F1"></uk-line>
-            <uk-line x1="200" y1="200" x2="200" y2="350" stroke-color="#6C827F"></uk-line>
-            <uk-line x1="200" y1="200" x2="50" y2="350" stroke-color="#196127"></uk-line>
-            <uk-line x1="200" y1="200" x2="50" y2="200" stroke-color="#D38C0D"></uk-line>
+        <div class="uk-container uk-margin-top uk-margin-bottom" uk-height-viewport="expand: true">
+            <div class="uk-height-1-1" uk-grid>
+                <div id="app" class="uk-width-1-3 uk-padding-remove uk-flex uk-flex-column">
+                    <form class="uk-form-stacked">
+                        <div class="uk-margin">
+                            <label class="uk-form-label" for="stroke-width">Stroke Width</label>
+                            <div class="uk-form-controls">
+                                <select id="stroke-width" class="uk-select" v-model="selectedWidth">
+                                    <option v-for="option of options" :value="option.value">
+                                        {{ option.text }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="uk-margin">
+                            <label class="uk-form-label">Stroke Color</label>
+                            <div class="uk-form-controls">
+                                <label>
+                                    <input class="uk-radio" type="radio" name="rado1" value="default" v-model="selectedColor">
+                                    default
+                                </label>
+                                <label class="uk-margin-small-left">
+                                    <input class="uk-radio" type="radio" name="rado1" value="success" v-model="selectedColor">
+                                    success
+                                </label>
+                                <label class="uk-margin-small-left">
+                                    <input class="uk-radio" type="radio" name="rado1" value="warning" v-model="selectedColor">
+                                    warning
+                                </label>
+                                <label class="uk-margin-small-left">
+                                    <input class="uk-radio" type="radio" name="rado1" value="danger" v-model="selectedColor">
+                                    danger
+                                </label>
+                                <br>
+                                <input class="uk-input uk-margin-small-top" type="text" v-model.lazy="selectedColor">
+                            </div>
+                        </div>
+                        <div class="uk-margin">
+                            <label class="uk-form-label">Stroke Dashed</label>
+                            <div class="uk-form-controls">
+                                <label>
+                                    <input class="uk-radio" type="radio" name="rado2" value="true" v-model="selectedDashed">
+                                    true
+                                </label>
+                                <label class="uk-margin-small-left">
+                                    <input class="uk-radio" type="radio" name="rado2" value="false" v-model="selectedDashed">
+                                    false
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="uk-position-relative uk-flex-1">
+                        <uk-line v-for="(endPoint, index) of endPoints"
+                                x1="190" y1="140" :x2="endPoint.x" :y2="endPoint.y"
+                                :key="index"
+                                :stroke-width="selectedWidth"
+                                :stroke-color="selectedColor"
+                                :stroke-dashed="selectedDashed">
+                        </uk-line>
+                    </div>
+                </div>
+                <div class="uk-width-2-3">
+                    <div class="uk-tile uk-tile-muted uk-padding-remove uk-height-1-1"></div>
+                </div>
+            </div>
         </div>
         <script src="/bundle.js"></script>
     </body>
