@@ -1,7 +1,7 @@
 <template lang="pug">
     svg.uk-line(:width="width" :height="height" :viewBox="box" :style="style")
         path(:d="path" :stroke="color" :stroke-width="normalizedBorderWidth" stroke-linecap="round")
-        path(:d="arrow" :stroke="color" :fill="color" :stroke-width="normalizedBorderWidth"
+        path(:d="arrowPath" :stroke="color" :fill="color" :stroke-width="normalizedBorderWidth"
             stroke-linecap="round" stroke-linejoin="round")
 </template>
 <script>
@@ -91,48 +91,80 @@
                     return Math.PI + Math.atan(diffY / diffX);
                 }
             },
+            arrow() {
+                let arrowSX = this.normalizedEndX - (ARROW_LENGTH * Math.cos(this.includedAngle + ARROW_ANGLE));
+                let arrowSY = this.normalizedEndY - (ARROW_LENGTH * Math.sin(this.includedAngle + ARROW_ANGLE));
+                let arrowEX = this.normalizedEndX - (ARROW_LENGTH * Math.cos(this.includedAngle - ARROW_ANGLE));
+                let arrowEY = this.normalizedEndY - (ARROW_LENGTH * Math.sin(this.includedAngle - ARROW_ANGLE));
+                let arrowMX = this.normalizedEndX - (ARROW_LENGTH / 2 * Math.cos(this.includedAngle));
+                let arrowMY = this.normalizedEndY - (ARROW_LENGTH / 2 * Math.sin(this.includedAngle));
+                return {
+                    startX: arrowSX,
+                    startY: arrowSY,
+                    endX: arrowEX,
+                    endY: arrowEY,
+                    middleX: arrowMX,
+                    middleY: arrowMY
+                }
+            },
+            min() {
+                return {
+                    x: Math.min(this.normalizedStartX, this.normalizedEndX,
+                                this.arrow.startX, this.arrow.endX),
+                    y: Math.min(this.normalizedStartY, this.normalizedEndY,
+                                this.arrow.startY, this.arrow.endY)
+                }
+            },
+            max() {
+                return {
+                    x: Math.max(this.normalizedStartX, this.normalizedEndX,
+                                this.arrow.startX, this.arrow.endX),
+                    y: Math.max(this.normalizedStartY, this.normalizedEndY,
+                                this.arrow.startY, this.arrow.endY)
+                }
+            },
             width() {
-                return Math.abs(this.normalizedStartX - this.normalizedEndX) + this.normalizedBorderWidth;
+                return this.max.x - this.min.x + this.normalizedBorderWidth;
             },
             height() {
-                return Math.abs(this.normalizedStartY - this.normalizedEndY) + this.normalizedBorderWidth;
+                return this.max.y - this.min.y + this.normalizedBorderWidth;
             },
             box() {
                 return "0 0 " + this.width + " " + this.height;
             },
             style() {
                 return {
-                    top: Math.min(this.normalizedStartY, this.normalizedEndY) + "px",
-                    left: Math.min(this.normalizedStartX, this.normalizedEndX) + "px"
+                    top: this.min.y + "px",
+                    left: this.min.x + "px"
                 }
             },
-            computedStart() {
+            computedPath() {
                 return {
-                    x: this.normalizedStartX - parseInt(this.style.left) + this.normalizedBorderWidth / 2,
-                    y: this.normalizedStartY - parseInt(this.style.top) + this.normalizedBorderWidth / 2
+                    startX: this.normalizedStartX - parseInt(this.style.left) + this.normalizedBorderWidth / 2,
+                    startY: this.normalizedStartY - parseInt(this.style.top) + this.normalizedBorderWidth / 2,
+                    endX: this.normalizedEndX - parseInt(this.style.left) + this.normalizedBorderWidth / 2,
+                    endY: this.normalizedEndY - parseInt(this.style.top) + this.normalizedBorderWidth / 2
                 }
             },
-            computedEnd() {
+            computedArrow() {
                 return {
-                    x: this.normalizedEndX - parseInt(this.style.left) + this.normalizedBorderWidth / 2,
-                    y: this.normalizedEndY - parseInt(this.style.top) + this.normalizedBorderWidth / 2
+                    startX: this.arrow.startX - parseInt(this.style.left) + this.normalizedBorderWidth / 2,
+                    startY: this.arrow.startY - parseInt(this.style.top) + this.normalizedBorderWidth / 2,
+                    endX: this.arrow.endX - parseInt(this.style.left) + this.normalizedBorderWidth / 2,
+                    endY: this.arrow.endY - parseInt(this.style.top) + this.normalizedBorderWidth / 2,
+                    middleX: this.arrow.middleX - parseInt(this.style.left) + this.normalizedBorderWidth / 2,
+                    middleY: this.arrow.middleY - parseInt(this.style.top) + this.normalizedBorderWidth / 2
                 }
             },
             path() {
-                return "M" + this.computedStart.x + " " + this.computedStart.y +
-                        " L" + this.computedEnd.x + " " + this.computedEnd.y;
+                return "M" + this.computedPath.startX + " " + this.computedPath.startY +
+                        " L" + this.computedPath.endX + " " + this.computedPath.endY;
             },
-            arrow() {
-                let endX = this.computedEnd.x;
-                let endY = this.computedEnd.y;
-                let arrowSX = endX - (ARROW_LENGTH * Math.cos(this.includedAngle + ARROW_ANGLE));
-                let arrowSY = endY - (ARROW_LENGTH * Math.sin(this.includedAngle + ARROW_ANGLE));
-                let arrowEX = endX - (ARROW_LENGTH * Math.cos(this.includedAngle - ARROW_ANGLE));
-                let arrowEY = endY - (ARROW_LENGTH * Math.sin(this.includedAngle - ARROW_ANGLE));
-                let arrowMX = endX - (ARROW_LENGTH / 2 * Math.cos(this.includedAngle));
-                let arrowMY = endY - (ARROW_LENGTH / 2 * Math.sin(this.includedAngle));
-                return "M" + arrowSX + " " + arrowSY + " L" + endX + " " + endY +
-                        " L" + arrowEX + " " + arrowEY + " L" + arrowMX + " " + arrowMY + " Z";
+            arrowPath() {
+                return "M" + this.computedArrow.startX + " " + this.computedArrow.startY +
+                        " L" + this.computedPath.endX + " " + this.computedPath.endY +
+                        " L" + this.computedArrow.endX + " " + this.computedArrow.endY +
+                        " L" + this.computedArrow.middleX + " " + this.computedArrow.middleY + " Z";
             },
             color() {
                 let c = this.borderColor;
