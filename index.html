@@ -6,8 +6,8 @@
     </head>
     <body>
         <div class="uk-container uk-margin-top uk-margin-bottom" uk-height-viewport="expand: true">
-            <div class="uk-height-1-1" uk-grid>
-                <div id="app" class="uk-width-1-3 uk-padding-remove uk-flex uk-flex-column">
+            <div id="app" class="uk-height-1-1" uk-grid>
+                <div class="uk-width-1-3 uk-padding-remove uk-flex uk-flex-column">
                     <form class="uk-form-stacked">
                         <div class="uk-margin">
                             <label class="uk-form-label" for="stroke-width">Stroke Width</label>
@@ -67,7 +67,8 @@
                     </div>
                 </div>
                 <div class="uk-width-2-3">
-                    <div class="uk-tile uk-tile-muted uk-padding-remove uk-height-1-1"></div>
+                    <div class="uk-tile uk-tile-muted uk-padding-remove uk-height-1-1"
+                        @mousedown="dragstart" @mousemove="drag" @mouseup="dragend"></div>
                 </div>
             </div>
         </div>
