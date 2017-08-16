@@ -20,13 +20,14 @@ options: {
     // x2, y2 The end point of joint line
     x2: Number, [default: 0]
     y2: Number, [default: 0]
-    stroke-width: Number, [default: 1]
-    stroke-color: String, ["default" or "success" or "warning" or "danger" or HEX value]
-    stroke-dashed: Boolean
+    stroke-width (optional): Number, [default: 1]
+    stroke-color (optional): String, ["default" or "success" or "warning" or "danger" or HEX value]
+    stroke-dashed (optional): Boolean [default: false]
 }
 -->
 <div id="app">
-    <uk-line x1="10" y1="10" x2="100" y2="100"
+    <uk-line x1="10" y1="10" x2="100" y2="100"></uk-line>
+    <uk-line x1="100" y1="100" x2="200" y2="100"
             stroke-width="2" stroke-color="default" stroke-dashed="true">
     </uk-line>
 </div>
