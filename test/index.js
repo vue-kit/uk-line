@@ -47,7 +47,7 @@ new Vue({
             jointLine = new Vue({
                 template: "<uk-line :x1='x1' :y1='y1' :x2='x2' :y2='y2' " +
                             ":stroke-width='strokeWidth' :stroke-color='strokeColor' " +
-                            ":stroke-dashed='strokeDashed' v-if='show'>" +
+                            ":stroke-dashed='strokeDashed'>" +
                           "</uk-line>",
                 data: {
                     x1: startX,
@@ -57,11 +57,6 @@ new Vue({
                     strokeWidth: this.selectedWidth,
                     strokeColor: this.selectedColor,
                     strokeDashed: this.selectedDashed
-                },
-                computed: {
-                    show() {
-                        return this.x1 != this.x2 || this.y1 != this.y2;
-                    }
                 }
             }).$mount();
             this.$tile.append(jointLine.$el);

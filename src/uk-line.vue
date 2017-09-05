@@ -1,5 +1,5 @@
 <template lang="pug">
-    svg.uk-line(:width="width" :height="height" :viewBox="box" :style="style")
+    svg.uk-line(:width="width" :height="height" :viewBox="box" :style="style" v-if="show")
         path(:d="path" :stroke="color" :stroke-width="borderWidth"
             :stroke-dasharray="dash" stroke-linecap="round")
         path(:d="arrowPath" :stroke="color" :fill="color" :stroke-width="borderWidth"
@@ -7,7 +7,6 @@
 </template>
 <script>
     const ARROW_ANGLE = Math.PI / 9;
-    const ARROW_LENGTH = 20;
     export default {
         name: "uk-line",
         props: {
@@ -82,6 +81,9 @@
                 return typeof this.strokeDashed === "string" ?
                         this.strokeDashed === "true" : this.strokeDashed;
             },
+            show() {
+                return this.startX != this.endX || this.startY != this.endY;
+            },
             includedAngle() {
                 let diffY = this.endY - this.startY;
                 let diffX = this.endX - this.startX;
@@ -93,13 +95,19 @@
                     return Math.PI + Math.atan(diffY / diffX);
                 }
             },
+            arrowLength() {
+                let diffX = this.endX - this.startX;
+                let diffY = this.endY - this.startY;
+                let lineLength = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2));
+                return Math.min(lineLength * .2, 20);
+            },
             arrow() {
-                let arrowSX = this.endX - (ARROW_LENGTH * Math.cos(this.includedAngle + ARROW_ANGLE));
-                let arrowSY = this.endY - (ARROW_LENGTH * Math.sin(this.includedAngle + ARROW_ANGLE));
-                let arrowEX = this.endX - (ARROW_LENGTH * Math.cos(this.includedAngle - ARROW_ANGLE));
-                let arrowEY = this.endY - (ARROW_LENGTH * Math.sin(this.includedAngle - ARROW_ANGLE));
-                let arrowMX = this.endX - (ARROW_LENGTH / 2 * Math.cos(this.includedAngle));
-                let arrowMY = this.endY - (ARROW_LENGTH / 2 * Math.sin(this.includedAngle));
+                let arrowSX = this.endX - (this.arrowLength * Math.cos(this.includedAngle + ARROW_ANGLE));
+                let arrowSY = this.endY - (this.arrowLength * Math.sin(this.includedAngle + ARROW_ANGLE));
+                let arrowEX = this.endX - (this.arrowLength * Math.cos(this.includedAngle - ARROW_ANGLE));
+                let arrowEY = this.endY - (this.arrowLength * Math.sin(this.includedAngle - ARROW_ANGLE));
+                let arrowMX = this.endX - (this.arrowLength / 2 * Math.cos(this.includedAngle));
+                let arrowMY = this.endY - (this.arrowLength / 2 * Math.sin(this.includedAngle));
                 return {
                     startX: arrowSX,
                     startY: arrowSY,
