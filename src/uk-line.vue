@@ -191,5 +191,6 @@
     .uk-line {
         position: absolute;
         box-sizing: border-box;
+        pointer-events: none;
     }
 </style>
