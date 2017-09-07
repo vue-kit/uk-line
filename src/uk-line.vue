@@ -1,9 +1,12 @@
 <template lang="pug">
-    svg.uk-line(:width="width" :height="height" :viewBox="box" :style="style" v-if="show")
+    svg.uk-line(:width="width" :height="height" :viewBox="box" :style="style" v-if="show"
+        @mousedown.stop="activate")
         path(:d="path" :stroke="color" :stroke-width="borderWidth"
             :stroke-dasharray="dash" stroke-linecap="round")
         path(:d="arrowPath" :stroke="color" :fill="color" :stroke-width="borderWidth"
             stroke-linecap="round" stroke-linejoin="round")
+        circle(v-for="handle of handles" :cx="handle.cx" :cy="handle.cy" :r="radius"
+            :name="handle.name" :stroke="color" :stroke-width="borderWidth" fill="none")
 </template>
 <script>
     const ARROW_ANGLE = Math.PI / 9;
@@ -61,6 +64,12 @@
                 }
             }
         },
+        data() {
+            return {
+                handles: [],
+                destroyed: false
+            }
+        },
         computed: {
             startX() {
                 return parseInt(this.x1);
@@ -77,12 +86,15 @@
             borderWidth() {
                 return parseFloat(this.strokeWidth);
             },
+            radius() {
+                return this.borderWidth + 3;
+            },
             dashed() {
                 return typeof this.strokeDashed === "string" ?
                         this.strokeDashed === "true" : this.strokeDashed;
             },
             show() {
-                return this.startX != this.endX || this.startY != this.endY;
+                return !this.destroyed && (this.startX != this.endX || this.startY != this.endY);
             },
             includedAngle() {
                 let diffY = this.endY - this.startY;
@@ -129,11 +141,14 @@
                     y: Math.max(this.startY, this.endY, this.arrow.startY, this.arrow.endY)
                 }
             },
+            padding() {
+                return this.radius * 2 + this.borderWidth;
+            },
             width() {
-                return this.max.x - this.min.x + this.borderWidth;
+                return this.max.x - this.min.x + this.padding;
             },
             height() {
-                return this.max.y - this.min.y + this.borderWidth;
+                return this.max.y - this.min.y + this.padding;
             },
             box() {
                 return "0 0 " + this.width + " " + this.height;
@@ -146,20 +161,20 @@
             },
             computedPath() {
                 return {
-                    startX: this.startX - parseInt(this.style.left) + this.borderWidth / 2,
-                    startY: this.startY - parseInt(this.style.top) + this.borderWidth / 2,
-                    endX: this.endX - parseInt(this.style.left) + this.borderWidth / 2,
-                    endY: this.endY - parseInt(this.style.top) + this.borderWidth / 2
+                    startX: this.startX - parseInt(this.style.left) + this.padding / 2,
+                    startY: this.startY - parseInt(this.style.top) + this.padding / 2,
+                    endX: this.endX - parseInt(this.style.left) + this.padding / 2,
+                    endY: this.endY - parseInt(this.style.top) + this.padding / 2
                 }
             },
             computedArrow() {
                 return {
-                    startX: this.arrow.startX - parseInt(this.style.left) + this.borderWidth / 2,
-                    startY: this.arrow.startY - parseInt(this.style.top) + this.borderWidth / 2,
-                    endX: this.arrow.endX - parseInt(this.style.left) + this.borderWidth / 2,
-                    endY: this.arrow.endY - parseInt(this.style.top) + this.borderWidth / 2,
-                    middleX: this.arrow.middleX - parseInt(this.style.left) + this.borderWidth / 2,
-                    middleY: this.arrow.middleY - parseInt(this.style.top) + this.borderWidth / 2
+                    startX: this.arrow.startX - parseInt(this.style.left) + this.padding / 2,
+                    startY: this.arrow.startY - parseInt(this.style.top) + this.padding / 2,
+                    endX: this.arrow.endX - parseInt(this.style.left) + this.padding / 2,
+                    endY: this.arrow.endY - parseInt(this.style.top) + this.padding / 2,
+                    middleX: this.arrow.middleX - parseInt(this.style.left) + this.padding / 2,
+                    middleY: this.arrow.middleY - parseInt(this.style.top) + this.padding / 2
                 }
             },
             path() {
@@ -192,6 +207,26 @@
                     return false;
                 }
             }
+        },
+        methods: {
+            activate(evt) {
+                if (this.handles.length == 0) {
+                    let sx = this.computedPath.startX;
+                    let sy = this.computedPath.startY;
+                    let ex = this.computedPath.endX;
+                    let ey = this.computedPath.endY;
+                    let mx = sx + (ex - sx) / 2;
+                    let my = sy + (ey - sy) / 2;
+                    this.handles.push({ name: "start", cx: sx, cy: sy });
+                    this.handles.push({ name: "middle", cx: mx, cy: my });
+                    this.handles.push({ name: "end", cx: ex, cy: ey });
+                    document.documentElement.addEventListener("mousedown", this.deactivate, true);
+                }
+            },
+            deactivate(evt) {
+                this.handles.splice(0, this.handles.length);
+                document.documentElement.removeEventListener("mousedown", this.deactivate, true);
+            }
         }
     }
 </script>
@@ -200,5 +235,12 @@
         position: absolute;
         box-sizing: border-box;
         pointer-events: none;
+        path {
+            pointer-events: painted;
+        }
+        circle {
+            pointer-events: all;
+            cursor: move;
+        }
     }
 </style>
