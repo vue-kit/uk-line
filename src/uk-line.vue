@@ -220,6 +220,7 @@
                 if (!this.handleShow) {
                     this.handleShow = true;
                     document.documentElement.addEventListener("mousedown", this.deactivate, true);
+                    document.documentElement.addEventListener("keyup", this.destroy);
                 } else {
                     if (evt.target.tagName === "circle") {
                         this.handleName = evt.target.getAttribute("name");
@@ -233,6 +234,7 @@
                 if (evt.target.parentNode != this.$el) {
                     this.handleShow = false;
                     document.documentElement.removeEventListener("mousedown", this.deactivate, true);
+                    document.documentElement.removeEventListener("keyup", this.destroy);
                 }
             },
             drag(evt) {
@@ -258,7 +260,22 @@
                 document.documentElement.removeEventListener("mouseup", this.dragend, true);
                 document.documentElement.style.cursor = "auto";
                 this.handleName = null;
+            },
+            removeAllEventListener() {
+                document.documentElement.removeEventListener("mousedown", this.deactivate, true);
+                document.documentElement.removeEventListener("mousemove", this.drag, true);
+                document.documentElement.removeEventListener("mouseup", this.dragend, true);
+                document.documentElement.removeEventListener("keyup", this.destroy);
+            },
+            destroy(evt) {
+                if (evt.key == "Backspace" || evt.key == "Delete") {
+                    this.destroyed = true;
+                    this.removeAllEventListener();
+                }
             }
+        },
+        beforeDestroy() {
+            this.removeAllEventListener();
         }
     }
 </script>

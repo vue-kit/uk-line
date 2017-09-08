@@ -68,7 +68,9 @@
                 </div>
                 <div class="uk-width-2-3">
                     <div class="uk-tile uk-tile-muted uk-padding-remove uk-height-1-1"
-                        @mousedown="dragstart" @mousemove="drag" @mouseup="dragend"></div>
+                        @mousedown="dragstart" @mousemove="drag" @mouseup="dragend"
+                        @keyup.delete="destroy" tabindex="0">
+                    </div>
                 </div>
             </div>
         </div>

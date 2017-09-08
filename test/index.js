@@ -9,6 +9,7 @@ UIkit.use(Icons);
 
 let dragging = false;
 let jointLine = null;
+let lines = [];
 
 Vue.component("uk-line", UkLine);
 new Vue({
@@ -47,7 +48,7 @@ new Vue({
             jointLine = new Vue({
                 template: "<uk-line :x1.sync='x1' :y1.sync='y1' :x2.sync='x2' :y2.sync='y2' " +
                             ":stroke-width='strokeWidth' :stroke-color='strokeColor' " +
-                            ":stroke-dashed='strokeDashed'>" +
+                            ":stroke-dashed='strokeDashed' v-if='!destroyed'>" +
                           "</uk-line>",
                 data: {
                     x1: startX,
@@ -56,10 +57,12 @@ new Vue({
                     y2: startY,
                     strokeWidth: this.selectedWidth,
                     strokeColor: this.selectedColor,
-                    strokeDashed: this.selectedDashed
+                    strokeDashed: this.selectedDashed,
+                    destroyed: false
                 }
             }).$mount();
             this.$tile.append(jointLine.$el);
+            lines.push(jointLine);
         },
         drag(evt) {
             if (dragging) {
@@ -70,6 +73,11 @@ new Vue({
         dragend(evt) {
             if (dragging) {
                 dragging = false;
+            }
+        },
+        destroy(evt) {
+            while (lines.length) {
+                lines.pop().destroyed = true;
             }
         }
     }
