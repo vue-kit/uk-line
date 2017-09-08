@@ -45,7 +45,7 @@ new Vue({
             let startX = evt.clientX - this.tileOffset.left;
             let startY = evt.clientY - this.tileOffset.top;
             jointLine = new Vue({
-                template: "<uk-line :x1='x1' :y1='y1' :x2='x2' :y2='y2' " +
+                template: "<uk-line :x1.sync='x1' :y1.sync='y1' :x2.sync='x2' :y2.sync='y2' " +
                             ":stroke-width='strokeWidth' :stroke-color='strokeColor' " +
                             ":stroke-dashed='strokeDashed'>" +
                           "</uk-line>",

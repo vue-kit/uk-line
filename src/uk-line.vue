@@ -1,12 +1,16 @@
 <template lang="pug">
     svg.uk-line(:width="width" :height="height" :viewBox="box" :style="style" v-if="show"
-        @mousedown.stop="activate")
+        @mousedown.stop.prevent="activate")
         path(:d="path" :stroke="color" :stroke-width="borderWidth"
             :stroke-dasharray="dash" stroke-linecap="round")
         path(:d="arrowPath" :stroke="color" :fill="color" :stroke-width="borderWidth"
             stroke-linecap="round" stroke-linejoin="round")
-        circle(v-for="handle of handles" :cx="handle.cx" :cy="handle.cy" :r="radius"
-            :name="handle.name" :stroke="color" :stroke-width="borderWidth" fill="none")
+        circle(name="start" :cx="computedPath.startX" :cy="computedPath.startY" :r="radius"
+            :stroke="color" :stroke-width="borderWidth" fill="none" v-if="handleShow")
+        circle(name="middle" :cx="computedPath.middleX" :cy="computedPath.middleY" :r="radius"
+            :stroke="color" :stroke-width="borderWidth" fill="none" v-if="handleShow")
+        circle(name="end" :cx="computedPath.endX" :cy="computedPath.endY" :r="radius"
+            :stroke="color" :stroke-width="borderWidth" fill="none" v-if="handleShow")
 </template>
 <script>
     const ARROW_ANGLE = Math.PI / 9;
@@ -66,7 +70,8 @@
         },
         data() {
             return {
-                handles: [],
+                handleShow: false,
+                handleName: null,
                 destroyed: false
             }
         },
@@ -163,6 +168,8 @@
                 return {
                     startX: this.startX - parseInt(this.style.left) + this.padding / 2,
                     startY: this.startY - parseInt(this.style.top) + this.padding / 2,
+                    middleX: (this.startX + this.endX) / 2 - parseInt(this.style.left) + this.padding / 2,
+                    middleY: (this.startY + this.endY) / 2 - parseInt(this.style.top) + this.padding / 2,
                     endX: this.endX - parseInt(this.style.left) + this.padding / 2,
                     endY: this.endY - parseInt(this.style.top) + this.padding / 2
                 }
@@ -210,22 +217,47 @@
         },
         methods: {
             activate(evt) {
-                if (this.handles.length == 0) {
-                    let sx = this.computedPath.startX;
-                    let sy = this.computedPath.startY;
-                    let ex = this.computedPath.endX;
-                    let ey = this.computedPath.endY;
-                    let mx = sx + (ex - sx) / 2;
-                    let my = sy + (ey - sy) / 2;
-                    this.handles.push({ name: "start", cx: sx, cy: sy });
-                    this.handles.push({ name: "middle", cx: mx, cy: my });
-                    this.handles.push({ name: "end", cx: ex, cy: ey });
+                if (!this.handleShow) {
+                    this.handleShow = true;
                     document.documentElement.addEventListener("mousedown", this.deactivate, true);
+                } else {
+                    if (evt.target.tagName === "circle") {
+                        this.handleName = evt.target.getAttribute("name");
+                        document.documentElement.style.cursor = "move";
+                        document.documentElement.addEventListener("mousemove", this.drag, true);
+                        document.documentElement.addEventListener("mouseup", this.dragend, true);
+                    }
                 }
             },
             deactivate(evt) {
-                this.handles.splice(0, this.handles.length);
-                document.documentElement.removeEventListener("mousedown", this.deactivate, true);
+                if (evt.target.parentNode != this.$el) {
+                    this.handleShow = false;
+                    document.documentElement.removeEventListener("mousedown", this.deactivate, true);
+                }
+            },
+            drag(evt) {
+                switch (this.handleName) {
+                    case "start":
+                        this.$emit("update:x1", this.startX + evt.movementX);
+                        this.$emit("update:y1", this.startY + evt.movementY);
+                        break;
+                    case "middle":
+                        this.$emit("update:x1", this.startX + evt.movementX);
+                        this.$emit("update:y1", this.startY + evt.movementY);
+                        this.$emit("update:x2", this.endX + evt.movementX);
+                        this.$emit("update:y2", this.endY + evt.movementY);
+                        break;
+                    case "end":
+                        this.$emit("update:x2", this.endX + evt.movementX);
+                        this.$emit("update:y2", this.endY + evt.movementY);
+                        break;
+                }
+            },
+            dragend(evt) {
+                document.documentElement.removeEventListener("mousemove", this.drag, true);
+                document.documentElement.removeEventListener("mouseup", this.dragend, true);
+                document.documentElement.style.cursor = "auto";
+                this.handleName = null;
             }
         }
     }
