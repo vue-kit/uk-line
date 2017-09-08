@@ -58,7 +58,7 @@
                     </form>
                     <div class="uk-position-relative uk-flex-1">
                         <uk-line v-for="(endPoint, index) of endPoints"
-                                x1="190" y1="140" :x2="endPoint.x" :y2="endPoint.y"
+                                x1="190" y1="140" :x2.sync="endPoint.x" :y2.sync="endPoint.y"
                                 :key="index"
                                 :stroke-width="selectedWidth"
                                 :stroke-color="selectedColor"

@@ -1,5 +1,5 @@
 <template lang="pug">
-    svg.uk-line(:width="width" :height="height" :viewBox="box" :style="style" v-if="show"
+    svg.uk-line(:id="id" :width="width" :height="height" :viewBox="box" :style="style" v-if="show"
         @mousedown.stop.prevent="activate")
         path(:d="path" :stroke="color" :stroke-width="borderWidth"
             :stroke-dasharray="dash" stroke-linecap="round")
@@ -70,6 +70,7 @@
         },
         data() {
             return {
+                id: "line-" + Date.now(),
                 handleShow: false,
                 handleName: null,
                 destroyed: false

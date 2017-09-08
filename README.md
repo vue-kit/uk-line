@@ -30,6 +30,7 @@ options: {
     <uk-line x1="100" y1="100" x2="200" y2="100"
             stroke-width="2" stroke-color="default" stroke-dashed="true">
     </uk-line>
+    <uk-line :x1.sync="x1" :y1.sync="y1" :x2.sync="x2" :y2.sync="y2"></uk-line>
 </div>
 ```
 
@@ -39,7 +40,13 @@ import UkLine from "uk-line";
 
 Vue.component("uk-line", UkLine);
 new Vue({
-    el: "#app"
+    el: "#app",
+    data: {
+        x1: 200,
+        y1: 100,
+        x2: 300,
+        y2: 10
+    }
 });
 ```
 
